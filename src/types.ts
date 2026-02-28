@@ -12,23 +12,23 @@ export type DealPayload = {
 };
 
 export const EmailVariantSchema = z.object({
-  subjectLine: z.string().max(60, "Subject line too long"),
-  headline: z.string().max(80, "Headline too long"),
-  cta: z.string().max(30, "CTA snippet too long")
+  subjectLine: z.string(),
+  headline: z.string(),
+  cta: z.string()
 });
 
 export const PushVariantSchema = z.object({
-  title: z.string().max(50),
-  body: z.string().max(100)
+  title: z.string(),
+  body: z.string()
 });
 
 export const ChannelVariantSchema = z.object({
   email: EmailVariantSchema,
-  whatsApp: z.string().max(160),
+  whatsApp: z.string(),
   push: PushVariantSchema,
-  glance: z.string().max(160),
-  payU: z.string().max(40),
-  instagram: z.string().max(400, "Instagram caption too long").describe("Caption with hashtags")
+  glance: z.string(),
+  payU: z.string(),
+  instagram: z.string()
 });
 
 export const EnglishGenerationSchema = z.object({
