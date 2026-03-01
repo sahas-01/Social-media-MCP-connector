@@ -50,6 +50,20 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           required: ['merchant_id', 'category', 'discount_value', 'discount_type', 'expiry_timestamp', 'min_order_value', 'max_redemptions', 'exclusive_flag'],
         },
       },
+      {
+        name: 'deliver_to_channel',
+        description: 'Delivers a specific piece of content to a single channel via its mock webhook endpoint. Useful for re-delivering failed messages or testing individual channel endpoints.',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            channel: { type: 'string', enum: ['email', 'whatsApp', 'push', 'glance', 'payU', 'instagram'], description: 'Target channel to deliver to' },
+            language: { type: 'string', enum: ['en', 'hi', 'te'], description: 'Language of the content' },
+            variant: { type: 'string', enum: ['urgency', 'value', 'socialProof'], description: 'Variant type' },
+            content: { type: 'string', description: 'The formatted content to deliver' },
+          },
+          required: ['channel', 'language', 'variant', 'content'],
+        },
+      },
     ],
   };
 });
@@ -64,8 +78,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       console.error(`[MCP] -> Generating 18 base English permutations via OpenAI...`);
       const englishVariants = await llmGen.generateEnglishVariants(deal);
       
-      console.error(`[MCP] -> Translating into Hindi & Telugu via Sarvam AI to hit 54 variants...`);
-      const fullVariants = await translator.generateFullPayload(englishVariants);
+      console.error(`[MCP] -> Localizing into Hindi & Telugu via OpenAI (culturally idiomatic)...`);
+      const fullVariants = await translator.generateFullPayload(englishVariants, deal);
       
       console.error(`[MCP] -> Beginning Webhook simulation and queueing dispatch...`);
       const deliveryStatus = await webhookSim.distributeAll(fullVariants);
@@ -101,6 +115,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           }
         ]
       }
+    }
+  }
+
+  if (request.params.name === 'deliver_to_channel') {
+    try {
+      const args = request.params.arguments as { channel: string; language: string; variant: string; content: string };
+      
+      console.error(`[MCP] -> Delivering to ${args.channel} (${args.language}/${args.variant})...`);
+      const result = await webhookSim.deliverToChannel(args.channel, args.language, args.variant, args.content);
+      console.error(`[MCP] -> ${result.status === 'delivered' ? '✅ Delivered' : '❌ Failed'} after ${result.attempts} attempt(s)`);
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify(result, null, 2)
+        }],
+      };
+    } catch (e: unknown) {
+      return {
+        isError: true,
+        content: [{ type: 'text', text: `Delivery error: ${getErrorMessage(e)}` }]
+      };
     }
   }
 

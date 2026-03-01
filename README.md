@@ -4,31 +4,31 @@ A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotoc
 
 ## What It Does
 
-One API call → 54 production-ready marketing strings.
+One tool call → 54 production-ready marketing strings.
 
 ```
 Merchant Deal Payload
         │
         ▼
-┌───────────────────────────┐
-│   OpenAI (gpt-4o)         │  → 18 English variants
-│   Structured JSON output  │    (6 channels × 3 A/B variants)
-└───────────┬───────────────┘
+┌─────────────────────────────────┐
+│   OpenAI (gpt-4o-mini)          │  → 18 English variants
+│   Structured Outputs (strict)   │    (6 channels × 3 A/B variants)
+└───────────┬─────────────────────┘
             │
             ▼
-┌───────────────────────────┐
-│   Sarvam AI (Sarvam-M)    │  → 36 localized variants
-│   Idiomatic Hindi/Telugu  │    (18 × 2 languages)
-└───────────┬───────────────┘
+┌─────────────────────────────────┐
+│   Sarvam AI (Sarvam-M chat)     │  → 36 localized variants
+│   Idiomatic Hindi & Telugu      │    (18 × 2 languages)
+└───────────┬─────────────────────┘
             │
             ▼
-┌───────────────────────────┐
-│   Webhook Simulator       │  → 54 delivery attempts
-│   Exponential backoff     │    with retry logic
-└───────────────────────────┘
+┌─────────────────────────────────┐
+│   Webhook Simulator             │  → 54 delivery attempts
+│   Exponential backoff retries   │    with success/failure logs
+└─────────────────────────────────┘
 ```
 
-**Total output: 54 strings + delivery logs**
+**Total output: 54 strings + 54 delivery logs**
 
 ---
 
@@ -39,9 +39,9 @@ Merchant Deal Payload
 | Component | Technology | Purpose |
 |---|---|---|
 | MCP Server | `@modelcontextprotocol/sdk` | Spec-compliant stdio server connectable to Claude Desktop |
-| Copy Generation | OpenAI `gpt-4o` | Generates 18 structured English A/B variants |
-| Localization | Sarvam AI `Sarvam-M` | Culturally idiomatic Hindi & Telugu rewriting (not literal translation) |
-| Schema Validation | `Zod` | Strict character limits enforced per channel |
+| Copy Generation | OpenAI `gpt-4o-mini` | Generates 18 structured English A/B variants via Structured Outputs |
+| Localization | Sarvam AI `Sarvam-M` (chat completions) | Culturally idiomatic Hindi & Telugu localization (not literal translation) |
+| Schema Validation | `Zod` | Runtime type validation for all generated content |
 | Runtime | `tsx` + TypeScript | Zero-build execution with full type safety |
 
 ### Project Structure
@@ -50,8 +50,8 @@ Merchant Deal Payload
 src/
 ├── index.ts              # MCP server entry point — tool registration & orchestration
 ├── types.ts              # Zod schemas & TypeScript types for all data structures
-├── llm-generator.ts      # OpenAI wrapper — generates 18 English variants
-├── translator.ts         # Sarvam-M wrapper — idiomatic Hindi/Telugu localization
+├── llm-generator.ts      # OpenAI wrapper — generates 18 English variants via Structured Outputs
+├── translator.ts         # Sarvam-M chat wrapper — culturally idiomatic Hindi/Telugu localization
 └── webhook-simulator.ts  # Mock delivery engine with exponential backoff retry
 ```
 
@@ -74,26 +74,41 @@ Each channel gets 3 psychologically distinct variants:
 - **Value** — Savings-focused, rational ROI, benefit-driven messaging
 - **Social Proof** — Popularity signals, crowd validation, trust-driven messaging
 
-These are **not** synonym swaps — they use entirely different psychological framing.
+These are **not** synonym swaps — they use entirely different psychological framing. The prompt explicitly instructs the model to write each variant as if a different copywriter authored it.
+
+### Structured Outputs
+
+We use OpenAI's **Structured Outputs** (`response_format: { type: 'json_schema', strict: true }`) to guarantee the LLM response matches our exact Zod schema every time. This eliminates:
+
+- Key casing mismatches (e.g., `Instagram` vs `instagram`)
+- Missing fields causing runtime validation failures
+- The need for any post-processing or normalization on the LLM output
+
+The JSON schema is defined inline in the API call with `additionalProperties: false` on every object, so the output is deterministically structured.
 
 ### Localization Strategy
 
-We use **Sarvam-M** (Sarvam AI's 24B-parameter multilingual chat model) instead of a translation API. The key difference:
+We use **Sarvam-M** (Sarvam AI's multilingual chat model) via `client.chat.completions()` instead of a formal translation API. The key difference:
 
-- ❌ Literal translation: *"Last chance! 50% off"* → *"आखिरी मौका! 50% छूट"*
-- ✅ Idiomatic localization: *"Last chance! 50% off"* → *"अरे भाई, आधी कीमत में खाना! आज नहीं तो कभी नहीं! 🔥"*
+- ❌ Literal translation: *"Only 2 redemptions available! Minimum order ₹5000"* → *"केवल 2 रिडेम्पशन उपलब्ध हैं! न्यूनतम ₹5000 का ऑर्डर"*
+- ✅ Idiomatic localization: → *"बस 2 बार मिलेगा ये offer! ₹5000 का order करो और मस्ती करो 🔥"*
 
-Each language has its own cultural guidance prompt:
-- **Hindi**: Colloquial North Indian urban expressions, conversational tone
-- **Telugu**: Telangana/Andhra pop culture references, expressive local phrases
+Each language has its own detailed cultural guidance prompt with few-shot examples:
+- **Hindi**: Hinglish with Mumbai ad agency energy, casual "तुम/तू" tone, WhatsApp-style slang
+- **Telugu**: Hyderabadi spoken style, casual expressions like "ఒరేయ్", "మిస్ అయితే నీ ఖర్మ", natural English mixing
+
+The formal `sarvam-translate:v1` API is kept as a fallback if Sarvam-M chat fails for any individual string.
+
+All 54 localization calls (6 variants × 9 fields each) run concurrently via `Promise.all` for optimal performance.
 
 ### Webhook Simulation
 
 Every one of the 54 formatted strings is dispatched to a mock webhook endpoint that simulates real-world delivery:
 
 - **20% random failure rate** to simulate network issues
-- **Exponential backoff retry** (up to 3 attempts per delivery)
+- **Exponential backoff retry** (up to 3 attempts per delivery, with 2^n × 100ms delays)
 - **Delivery report** with per-channel success/failure status and attempt counts
+- All 54 dispatches run concurrently via `Promise.all`
 
 ---
 
@@ -101,7 +116,7 @@ Every one of the 54 formatted strings is dispatched to a mock webhook endpoint t
 
 ### Prerequisites
 
-- Node.js ≥18
+- Node.js ≥ 18
 - An OpenAI API key
 - A Sarvam AI API key ([dashboard.sarvam.ai](https://dashboard.sarvam.ai))
 
@@ -134,6 +149,8 @@ npx -y @modelcontextprotocol/inspector tsx src/index.ts
 
 Open the URL printed in your terminal (usually `http://localhost:6274`), connect, go to **Tools → distribute_deal**, fill in the deal parameters, and click **Run Tool**.
 
+> **Note:** Set the Request Timeout to at least `60000` ms in the Inspector's Configuration panel, as the full pipeline (LLM generation + translations + webhook simulation) takes 20–40 seconds.
+
 ---
 
 ## Connecting to Claude Desktop
@@ -158,18 +175,40 @@ Add this to your `claude_desktop_config.json` (macOS: `~/Library/Application Sup
 }
 ```
 
-Restart Claude Desktop (`Cmd + R`). The hammer 🔨 icon should appear indicating the tool is connected.
+> **Important:** Claude Desktop spawns the MCP server as a child process with a clean environment. You **must** include your API keys in the `"env"` block — it will not read your `.env` file or shell environment.
+
+> **Note:** If `node` is installed via Homebrew with a versioned path (e.g., `/opt/homebrew/opt/node@20/bin/node`), you may need to symlink it: `ln -sf /opt/homebrew/opt/node@20/bin/node /opt/homebrew/bin/node`
+
+After saving the config, restart Claude Desktop (`Cmd + Q` → reopen). The 🔨 hammer icon should appear in new conversations — click it to verify `distribute_deal` is registered.
 
 ### Sample Prompts for Demo
 
+You can use natural language — Claude will map it to the tool parameters automatically.
+
 **Deal 1 — Zomato (Food)**
-> Distribute this deal: merchant_id='ZOM123', category='Food', discount_value='50%', discount_type='PERCENTAGE', expiry_timestamp='2026-03-15T23:59:00Z', min_order_value=200, max_redemptions=5000, exclusive_flag=true
+> Hey, I have a new Zomato deal: 50% off on food orders, min order ₹200, 5000 redemptions available, expires March 15th, exclusive to GrabOn. Distribute this across all channels.
 
 **Deal 2 — MakeMyTrip (Travel)**
-> Distribute this deal: merchant_id='MMT456', category='Travel', discount_value='Rs. 2000', discount_type='FLAT', expiry_timestamp='2026-04-01T23:59:00Z', min_order_value=5000, max_redemptions=1000, exclusive_flag=false
+> Distribute a MakeMyTrip travel deal: flat ₹2000 off on bookings over ₹5000, 1000 redemptions, expires April 1st, available across platforms.
 
 **Deal 3 — Myntra (Fashion)**
-> Distribute this deal: merchant_id='MYN789', category='Fashion', discount_value='40%', discount_type='PERCENTAGE', expiry_timestamp='2026-03-10T23:59:00Z', min_order_value=999, max_redemptions=10000, exclusive_flag=true
+> New Myntra fashion deal: 40% off, min order ₹999, 10000 redemptions, expires March 10th, exclusive. Distribute it.
+
+Or with explicit parameters:
+
+```
+Distribute this deal: merchant_id='ZOM123', category='Food', discount_value='50%', 
+discount_type='PERCENTAGE', expiry_timestamp='2026-03-15T23:59:00Z', 
+min_order_value=200, max_redemptions=5000, exclusive_flag=true
+```
+
+### Suggested Follow-up Prompts
+
+After the tool runs, ask Claude to present the output:
+
+- *"Show me all 54 strings in a table, organized by language, variant, and channel"*
+- *"Compare the urgency vs value variants for WhatsApp across all 3 languages"*
+- *"Which deliveries failed and how many retries did each take?"*
 
 ---
 
@@ -181,8 +220,8 @@ The tool returns a JSON object containing:
 {
   "status": "success",
   "total_variants_generated": 54,
-  "successful_webhook_deliveries": 48,
-  "failed_webhook_deliveries": 6,
+  "successful_webhook_deliveries": 51,
+  "failed_webhook_deliveries": 3,
   "deal_payload": { ... },
   "generated_content": {
     "en": { "urgency": { ... }, "value": { ... }, "socialProof": { ... } },
@@ -194,6 +233,19 @@ The tool returns a JSON object containing:
     { "channel": "whatsApp", "language": "hi", "variant": "value", "status": "failed", "attempts": 3 },
     ...
   ]
+}
+```
+
+Each variant contains all 6 channel fields:
+
+```json
+{
+  "email": { "subjectLine": "...", "headline": "...", "cta": "..." },
+  "whatsApp": "...",
+  "push": { "title": "...", "body": "..." },
+  "glance": "...",
+  "payU": "...",
+  "instagram": "..."
 }
 ```
 

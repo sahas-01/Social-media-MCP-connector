@@ -67,12 +67,32 @@ Generate 3 variants with COMPLETELY different emotional triggers:
 
 These must NOT be rephrased versions of each other. They should feel like 3 different writers wrote them.
 
-═══ TRANSLATION NOTE ═══
+═══ TONE GUIDELINES ═══
 
-These English outputs will be machine-translated into Hindi and Telugu. Write copy that translates well:
-- Use concrete numbers and emojis (₹200, 🔥, ⏰) — these survive translation perfectly.
-- Avoid English-only puns, wordplay, or idioms that lose meaning when translated.
-- Keep sentence structures simple and direct — complex clauses break in translation.
+The copy must be PUNCHY and HIGH-CONVERTING but NEVER irritating, spammy, or desperate.
+
+DO:
+- Create genuine curiosity — make users WANT to check the deal, not feel pressured
+- Use a confident, insider tone — like you're letting them in on something good
+- Lead with value, not noise. Show them what they gain, not what they lose
+- Be concise and sharp. Every word must earn its place
+- Use subtle FOMO — "only 2 left" is powerful; "BUY NOW OR MISS OUT FOREVER!!!" is spam
+- Make the user feel smart for finding this deal, not manipulated into clicking
+
+DON'T:
+- Use ALL CAPS excessively or multiple exclamation marks (!!!)
+- Sound like a desperate salesperson. No "HURRY HURRY!" or "LAST CHANCE EVER!"
+- Use clickbait that doesn't deliver. If the deal is ₹100 off, don't say "UNBELIEVABLE SAVINGS"
+- Be generic. "Great deals await!" means nothing. Be specific: "₹100 off your next Zomato order"
+
+The best copy feels like a helpful heads-up from a friend, not an ad screaming at you.
+
+═══ LOCALIZATION NOTE ═══
+
+These English outputs will be localized into Hindi and Telugu using a chat-based AI model:
+- Use concrete numbers and emojis (₹200, 🔥, ⏰) — these carry over perfectly across languages.
+- Avoid English-only puns, wordplay, or idioms that lose meaning in other languages.
+- Keep sentence structures simple and direct — the localizer works best with clear, punchy inputs.
 
 ═══ HARD CHARACTER LIMITS — DO NOT EXCEED ═══
 
