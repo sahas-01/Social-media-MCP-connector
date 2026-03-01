@@ -108,7 +108,55 @@ Return ONLY this JSON (no markdown, no code fences). Use EXACTLY these key names
     const completion = await this.openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' },
+      response_format: {
+        type: 'json_schema',
+        json_schema: {
+          name: 'deal_variants',
+          strict: true,
+          schema: {
+            type: 'object',
+            properties: {
+              urgency: { $ref: '#/$defs/variant' },
+              value: { $ref: '#/$defs/variant' },
+              socialProof: { $ref: '#/$defs/variant' },
+            },
+            required: ['urgency', 'value', 'socialProof'],
+            additionalProperties: false,
+            $defs: {
+              variant: {
+                type: 'object',
+                properties: {
+                  email: {
+                    type: 'object',
+                    properties: {
+                      subjectLine: { type: 'string' },
+                      headline: { type: 'string' },
+                      cta: { type: 'string' },
+                    },
+                    required: ['subjectLine', 'headline', 'cta'],
+                    additionalProperties: false,
+                  },
+                  whatsApp: { type: 'string' },
+                  push: {
+                    type: 'object',
+                    properties: {
+                      title: { type: 'string' },
+                      body: { type: 'string' },
+                    },
+                    required: ['title', 'body'],
+                    additionalProperties: false,
+                  },
+                  glance: { type: 'string' },
+                  payU: { type: 'string' },
+                  instagram: { type: 'string' },
+                },
+                required: ['email', 'whatsApp', 'push', 'glance', 'payU', 'instagram'],
+                additionalProperties: false,
+              },
+            },
+          },
+        },
+      },
       temperature: 0.7,
     });
 
@@ -117,34 +165,10 @@ Return ONLY this JSON (no markdown, no code fences). Use EXACTLY these key names
       throw new Error('Empty response from OpenAI');
     }
 
+    // Structured Outputs guarantees the JSON matches our schema exactly —
+    // no normalization needed, keys are always correct.
     const parsed = JSON.parse(rawText);
-
-    // GPT-4o-mini sometimes uses different casing (Instagram vs instagram, Payu vs payU)
-    // Normalize keys to match our exact Zod schema
-    const normalizeVariant = (v: Record<string, unknown>): Record<string, unknown> => {
-      const keyMap: Record<string, string> = {
-        'instagram': 'instagram', 'Instagram': 'instagram',
-        'whatsapp': 'whatsApp', 'WhatsApp': 'whatsApp', 'whatsApp': 'whatsApp', 'Whatsapp': 'whatsApp',
-        'payu': 'payU', 'PayU': 'payU', 'payU': 'payU', 'Payu': 'payU', 'payu_banner': 'payU',
-        'glance': 'glance', 'Glance': 'glance',
-        'email': 'email', 'Email': 'email',
-        'push': 'push', 'Push': 'push',
-        'socialproof': 'socialProof', 'SocialProof': 'socialProof', 'socialProof': 'socialProof', 'social_proof': 'socialProof',
-      };
-      const normalized: Record<string, unknown> = {};
-      for (const [key, value] of Object.entries(v)) {
-        normalized[keyMap[key] || key] = value;
-      }
-      return normalized;
-    };
-
-    const normalized = {
-      urgency: normalizeVariant((parsed.urgency || parsed.Urgency) as Record<string, unknown>),
-      value: normalizeVariant((parsed.value || parsed.Value) as Record<string, unknown>),
-      socialProof: normalizeVariant((parsed.socialProof || parsed.SocialProof || parsed.social_proof) as Record<string, unknown>),
-    };
-
-    const validated = EnglishGenerationSchema.parse(normalized);
+    const validated = EnglishGenerationSchema.parse(parsed);
     return validated;
   }
 }
