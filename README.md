@@ -2,7 +2,7 @@
 
 A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that turns a single merchant deal payload into **54 fully formatted, localized deal placements** across 6 channels — simultaneously. Built for solving the problem of multi-channel deal distribution.
 
-> **📖 New here?** Follow the **[Setup Guide](./SETUP_GUIDE.md)** for step-by-step instructions to get the server running and connected to Claude Desktop.
+> **📖 New here?** Follow the **[Setup Guide](./SETUP_AND_RUN_GUIDE.md)** for step-by-step instructions to get the server running and connected to Claude Desktop.
 
 ## What It Does
 
