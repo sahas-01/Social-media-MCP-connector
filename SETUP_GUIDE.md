@@ -242,3 +242,48 @@ User (Claude Desktop)
      │ Delivery logs │
      └───────────────┘
 ```
+
+---
+
+## Output Structure
+
+The tool returns a JSON object containing:
+
+```json
+{
+  "status": "success",
+  "total_variants_generated": 54,
+  "successful_webhook_deliveries": 51,
+  "failed_webhook_deliveries": 3,
+  "deal_payload": { ... },
+  "generated_content": {
+    "en": { "urgency": { ... }, "value": { ... }, "socialProof": { ... } },
+    "hi": { "urgency": { ... }, "value": { ... }, "socialProof": { ... } },
+    "te": { "urgency": { ... }, "value": { ... }, "socialProof": { ... } }
+  },
+  "delivery_logs": [
+    { "channel": "email", "language": "en", "variant": "urgency", "status": "delivered", "attempts": 1 },
+    { "channel": "whatsApp", "language": "hi", "variant": "value", "status": "failed", "attempts": 3 },
+    ...
+  ]
+}
+```
+
+Each variant contains all 6 channel fields:
+
+```json
+{
+  "email": { "subjectLine": "...", "headline": "...", "cta": "..." },
+  "whatsApp": "...",
+  "push": { "title": "...", "body": "..." },
+  "glance": "...",
+  "payU": "...",
+  "instagram": "..."
+}
+```
+
+---
+
+## License
+
+ISC
