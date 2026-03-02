@@ -241,15 +241,12 @@ CHANNEL GUIDELINES (respect character limits):
       const response = await this.sarvam.chat.completions({
         messages: [
           {
-            role: 'assistant',
-            content: `You are a ${langName} language expert and proofreader. Your ONLY job is to refine this marketing copy so it sounds perfectly natural in ${langName}. Fix any grammar issues, ensure the script is accurate, and make it read like a native ${langName} speaker wrote it. Keep the same meaning, emotional tone, slang, emojis, and brand names. Keep English words that are commonly mixed in ${langName} (deal, offer, order, save). Return ONLY the refined text.`
-          },
-          {
             role: 'user',
-            content: text
+            content: `You are a ${langName} language expert and proofreader. Your ONLY job is to refine this marketing copy so it sounds perfectly natural in ${langName}. Fix any grammar issues, ensure the script is accurate, and make it read like a native ${langName} speaker wrote it. Keep the same meaning, emotional tone, slang, emojis, and brand names. Keep English words that are commonly mixed in ${langName} (deal, offer, order, save). Return ONLY the refined text.\n\nText to refine:\n${text}`
           }
         ],
         temperature: 0.3,
+        top_p: 1,
         max_tokens: 300,
       });
 
