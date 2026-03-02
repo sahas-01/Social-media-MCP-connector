@@ -2,6 +2,8 @@
 
 A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that turns a single merchant deal payload into **54 fully formatted, localized deal placements** across 6 channels — simultaneously. Built for GrabOn's multi-channel distribution infrastructure.
 
+> **📖 New here?** Follow the **[Setup Guide](./SETUP_GUIDE.md)** for step-by-step instructions to get the server running and connected to Claude Desktop.
+
 ## What It Does
 
 One tool call → 54 production-ready marketing strings.
@@ -29,6 +31,12 @@ Merchant Deal Payload
 ```
 
 **Total output: 54 strings + 54 delivery logs**
+
+### Transport: Local stdio
+
+This MCP server uses the **stdio transport** — Claude Desktop launches it as a local child process and communicates via stdin/stdout. Everything runs on your machine, no remote server needed.
+
+> **Future scaling:** To deploy this for team-wide use (e.g., 50 GrabOn marketers using one shared server), the transport can be swapped from stdio to **SSE/HTTP** ([MCP Streamable HTTP spec](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http)).
 
 ---
 
@@ -113,6 +121,8 @@ Every one of the 54 formatted strings is dispatched to a mock webhook endpoint t
 ---
 
 ## Setup
+
+> For a detailed, step-by-step walkthrough (including troubleshooting), see **[SETUP_GUIDE.md](./SETUP_GUIDE.md)**.
 
 ### Prerequisites
 

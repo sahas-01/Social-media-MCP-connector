@@ -41,16 +41,18 @@ DEAL TO PROMOTE:
    - Body = the payoff. One clear reason to open the app NOW.
    - BAD title: "New deal available" → GOOD title: "Your food just got 50% cheaper 🍔"
 
-4. GLANCE LOCK SCREEN (≤160 chars)
-   - This appears on a LOCKED phone with ZERO context. The user hasn't opened any app.
-   - Must be completely self-explanatory, intriguing, and concise.
-   - Write it like a magazine headline that makes someone pick up the magazine.
-   - BAD: "Great deals available on GrabOn" → GOOD: "₹200 off your next Zomato order — only 47 people have claimed this so far"
+4. GLANCE LOCK SCREEN (≤160 chars, MUST work without context)
+   - Glance is an AI-powered shopping agent that shows content on LOCKED phone screens.
+   - The user has ZERO context — no app is open, they just glanced at their phone.
+   - Must be FULLY self-explanatory: include brand name, offer amount, and a hook in one line.
+   - Feel like a curated recommendation from a smart shopping assistant, not a generic ad.
+   - BAD: "Great deals available!" → GOOD: "₹200 off your next Zomato order — only 47 people have claimed this so far"
 
 5. PAYU CHECKOUT BANNER (≤40 chars)
-   - The user is ALREADY at checkout, about to pay. This is the last-second save.
-   - Pure action. Show the savings. Create instant regret if they ignore it.
-   - BAD: "Save on your order" → GOOD: "Wait — save ₹200 on this order →"
+   - PayU is India's leading payment gateway (5 lakh+ businesses). The user sees this at the CHECKOUT page while paying.
+   - They're already committed to buying — this banner appears in the PayU Offer Engine alongside EMI/BNPL options.
+   - Pure instant savings. Show the exact amount they save RIGHT NOW. No explanation needed, just the number.
+   - BAD: "Save on your order" → GOOD: "Apply & save ₹200 instantly →"
 
 6. INSTAGRAM CAPTION (≤400 chars)
    - Minimal. Aesthetic. Gen-Z energy. Not corporate.
