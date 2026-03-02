@@ -128,6 +128,6 @@ Every one of the 54 formatted strings is dispatched to a mock webhook endpoint t
 
 ## Setup
 
-> For a detailed, step-by-step walkthrough (including troubleshooting), see **[SETUP_GUIDE.md](./SETUP_GUIDE.md)**.
+> For a detailed, step-by-step walkthrough (including troubleshooting), see **[SETUP_GUIDE.md](./SETUP_AND_RUN_GUIDE.md)**.
 
 
