@@ -18,6 +18,7 @@ This guide walks you through setting up the MCP server from scratch and connecti
 |---|---|---|
 | **OpenAI** | Generates English marketing copy (gpt-4o-mini) | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
 | **Sarvam AI** | Refines Hindi & Telugu localization (Sarvam-M) | [dashboard.sarvam.ai](https://dashboard.sarvam.ai) |
+| **Resend** (Optional) | Sends actual emails via `send_real_email` tool | [resend.com/api-keys](https://resend.com/api-keys) |
 
 ---
 
@@ -51,6 +52,7 @@ Add your API keys:
 ```env
 OPENAI_API_KEY=sk-proj-your-openai-key-here
 SARVAM_API_KEY=sk_your-sarvam-key-here
+RESEND_API_KEY=re_your-resend-key-here
 ```
 
 > **Note:** The `.env` file is only used when running the MCP Inspector locally. Claude Desktop uses its own env config (see Step 4).
@@ -67,7 +69,7 @@ npx -y @modelcontextprotocol/inspector tsx src/index.ts
 
 1. Open the URL printed in terminal (usually `http://localhost:6274`)
 2. Click **Connect** in the Inspector UI
-3. Go to the **Tools** tab — you should see `distribute_deal` and `deliver_to_channel`
+3. Go to the **Tools** tab — you should see `distribute_deal`, `deliver_to_channel`, and `send_real_email`
 4. **Important:** Set **Request Timeout** to `120000` ms (2 minutes) in the Configuration panel. The full pipeline takes 30–60 seconds.
 5. Click `distribute_deal`, fill in test parameters:
 
@@ -112,7 +114,8 @@ Open `claude_desktop_config.json` and add or merge the following. **Replace the 
       ],
       "env": {
         "OPENAI_API_KEY": "sk-proj-your-openai-key-here",
-        "SARVAM_API_KEY": "sk_your-sarvam-key-here"
+        "SARVAM_API_KEY": "sk_your-sarvam-key-here",
+        "RESEND_API_KEY": "re_your-resend-key-here"
       }
     }
   }
@@ -131,7 +134,7 @@ Fully quit Claude Desktop (`Cmd + Q` on macOS) and reopen it.
 
 1. Open a **new conversation** in Claude Desktop
 2. Look for the **🔨 hammer icon** at the bottom of the input box
-3. Click it — you should see `distribute_deal` and `deliver_to_channel` listed
+3. Click it — you should see `distribute_deal`, `deliver_to_channel`, and `send_real_email` listed
 4. If you don't see the hammer icon, check the logs:
 
 ```bash
@@ -166,6 +169,7 @@ After the tool runs, ask Claude to present the data:
 - *"Compare the urgency vs value variants for WhatsApp across all 3 languages"*
 - *"Which deliveries failed and how many retries did each take?"*
 - *"Re-deliver the failed items"* (uses the `deliver_to_channel` tool)
+- *"Use the send_real_email tool to send the English Urgency email to myname@gmail.com"*
 
 ---
 

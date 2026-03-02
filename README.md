@@ -1,6 +1,6 @@
 # MCP Multi-Channel Deal Distributor
 
-A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that turns a single merchant deal payload into **54 fully formatted, localized deal placements** across 6 channels — simultaneously. Built for solving the problem of multi-channel deal distribution infrastructure.
+A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that turns a single merchant deal payload into **54 fully formatted, localized deal placements** across 6 channels — simultaneously. Built for solving the problem of multi-channel deal distribution.
 
 > **📖 New here?** Follow the **[Setup Guide](./SETUP_GUIDE.md)** for step-by-step instructions to get the server running and connected to Claude Desktop.
 
@@ -13,21 +13,27 @@ Merchant Deal Payload
         │
         ▼
 ┌─────────────────────────────────┐
-│   OpenAI (gpt-4o-mini)          │  → 18 English variants
-│   Structured Outputs (strict)   │    (6 channels × 3 A/B variants)
-└───────────┬─────────────────────┘
-            │
-            ▼
-┌─────────────────────────────────┐
-│   Sarvam AI (Sarvam-M chat)     │  → 36 localized variants
-│   Idiomatic Hindi & Telugu      │    (18 × 2 languages)
-└───────────┬─────────────────────┘
-            │
-            ▼
-┌─────────────────────────────────┐
-│   Webhook Simulator             │  → 54 delivery attempts
-│   Exponential backoff retries   │    with success/failure logs
-└─────────────────────────────────┘
+  │   OpenAI (gpt-4o-mini)          │  → 18 English variants
+  │   Structured Outputs (strict)   │    (6 channels × 3 A/B variants)
+  └───────────┬─────────────────────┘
+              │
+              ▼
+  ┌─────────────────────────────────┐
+  │   Sarvam AI (Sarvam-M chat)     │  → 36 localized variants
+  │   Idiomatic Hindi & Telugu      │    (18 × 2 languages)
+  └───────────┬─────────────────────┘
+              │
+              ▼
+  ┌─────────────────────────────────┐
+  │   Webhook Simulator             │  → 54 delivery attempts
+  │   Exponential backoff retries   │    with success/failure logs
+  └───────────┬─────────────────────┘
+              │
+              ▼
+  ┌─────────────────────────────────┐
+  │   Resend API (Optional Tool)    │  → Actually emails the generated
+  │   send_real_email               │    copy to a real inbox
+  └─────────────────────────────────┘
 ```
 
 **Total output: 54 strings + 54 delivery logs**
@@ -49,6 +55,7 @@ This MCP server uses the **stdio transport** — Claude Desktop launches it as a
 | MCP Server | `@modelcontextprotocol/sdk` | Spec-compliant stdio server connectable to Claude Desktop |
 | Copy Generation | OpenAI `gpt-4o-mini` | Generates 18 structured English A/B variants via Structured Outputs |
 | Localization | Sarvam AI `Sarvam-M` (chat completions) | Culturally idiomatic Hindi & Telugu localization (not literal translation) |
+| Email Delivery | Resend API | Real email delivery for the generated copy |
 | Schema Validation | `Zod` | Runtime type validation for all generated content |
 | Runtime | `tsx` + TypeScript | Zero-build execution with full type safety |
 
@@ -60,7 +67,8 @@ src/
 ├── types.ts              # Zod schemas & TypeScript types for all data structures
 ├── llm-generator.ts      # OpenAI wrapper — generates 18 English variants via Structured Outputs
 ├── translator.ts         # Sarvam-M chat wrapper — culturally idiomatic Hindi/Telugu localization
-└── webhook-simulator.ts  # Mock delivery engine with exponential backoff retry
+├── webhook-simulator.ts  # Mock delivery engine with exponential backoff retry
+└── email-service.ts      # Resend API wrapper for actual email delivery
 ```
 
 ### The 6 Channels
@@ -145,6 +153,7 @@ Create a `.env` file in the project root:
 ```env
 OPENAI_API_KEY=sk-...
 SARVAM_API_KEY=...
+RESEND_API_KEY=re_... (Optional, for the send_real_email tool)
 ```
 
 ---
@@ -178,7 +187,8 @@ Add this to your `claude_desktop_config.json` (macOS: `~/Library/Application Sup
       ],
       "env": {
         "OPENAI_API_KEY": "sk-...",
-        "SARVAM_API_KEY": "..."
+        "SARVAM_API_KEY": "...",
+        "RESEND_API_KEY": "re_..."
       }
     }
   }
@@ -219,6 +229,7 @@ After the tool runs, ask Claude to present the output:
 - *"Show me all 54 strings in a table, organized by language, variant, and channel"*
 - *"Compare the urgency vs value variants for WhatsApp across all 3 languages"*
 - *"Which deliveries failed and how many retries did each take?"*
+- *"Use the send_real_email tool to send the English Urgency email to myaddress@gmail.com"*
 
 ---
 
