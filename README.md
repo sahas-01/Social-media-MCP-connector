@@ -8,32 +8,50 @@ A fully spec-compliant [Model Context Protocol (MCP)](https://modelcontextprotoc
 
 One tool call → 54 production-ready marketing strings.
 
-```
-Merchant Deal Payload
-        │
-        ▼
-┌─────────────────────────────────┐
-  │   OpenAI (gpt-4o-mini)          │  → 18 English variants
-  │   Structured Outputs (strict)   │    (6 channels × 3 A/B variants)
-  └───────────┬─────────────────────┘
-              │
-              ▼
-  ┌─────────────────────────────────┐
-  │   Sarvam AI (Sarvam-M chat)     │  → 36 localized variants
-  │   Idiomatic Hindi & Telugu      │    (18 × 2 languages)
-  └───────────┬─────────────────────┘
-              │
-              ▼
-  ┌─────────────────────────────────┐
-  │   Webhook Simulator             │  → 54 delivery attempts
-  │   Exponential backoff retries   │    with success/failure logs
-  └───────────┬─────────────────────┘
-              │
-              ▼
-  ┌─────────────────────────────────┐
-  │   Resend API (Optional Tool)    │  → Actually emails the generated
-  │   send_real_email               │    copy to a real inbox
-  └─────────────────────────────────┘
+```text
+User (Claude Desktop)
+    │
+    │  Natural language: "Distribute this deal..."
+    ▼
+┌──────────────────────────┐
+│  MCP Server (index.ts)   │  ← Receives tool call via stdio
+│  distribute_deal()       │
+└──────────┬───────────────┘
+           │
+    ┌──────┴──────┐
+    ▼             ▼
+┌──────────┐  ┌──────────────┐
+│ OpenAI   │  │ OpenAI       │  ← 3 parallel API calls
+│ English  │  │ Hindi/Telugu │    (1 English + 2 regional)
+│ 18 vars  │  │ 36 vars raw  │
+└────┬─────┘  └──────┬───────┘
+     │               │
+     │               ▼
+     │        ┌──────────────┐
+     │        │ Sarvam-M     │  ← 36 concurrent refinement calls
+     │        │ Polish each  │
+     │        │ string       │
+     │        └──────┬───────┘
+     │               │
+     └───────┬───────┘
+             ▼
+     ┌───────────────┐
+     │ 54 total      │  → 54 production-ready marketing strings
+     │ variants      │    (18 English, 18 Hindi, 18 Telugu)
+     └───────┬───────┘
+             │
+             ▼
+     ┌───────────────┐
+     │ Webhook Sim   │  ← 54 concurrent simulated deliveries
+     │ Retry logic   │    with exponential backoff
+     │ Delivery logs │
+     └───────────────┘
+             │
+             ▼
+     ┌───────────────┐
+     │ Resend API    │  ← Optional independent tool (`send_real_email`)
+     │ Real delivery │    to actually send a generated email to an inbox
+     └───────────────┘
 ```
 
 **Total output: 54 strings + 54 delivery logs**

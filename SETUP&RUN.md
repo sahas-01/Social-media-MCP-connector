@@ -199,51 +199,7 @@ After the tool runs, ask Claude to present the data:
 | `Sarvam-M Refinement failed` | Sarvam API issue (non-fatal — falls back to OpenAI version) | Check your key at [dashboard.sarvam.ai](https://dashboard.sarvam.ai) |
 | `ECONNREFUSED` | Server crashed during startup | Check logs for TypeScript errors: `npx tsc --noEmit` |
 
----
 
-## Architecture Overview
-
-```
-User (Claude Desktop)
-    │
-    │  Natural language: "Distribute this Zomato deal..."
-    ▼
-┌──────────────────────────┐
-│  MCP Server (index.ts)   │  ← Receives tool call via stdio
-│  distribute_deal()       │
-└──────────┬───────────────┘
-           │
-    ┌──────┴──────┐
-    ▼             ▼
-┌──────────┐  ┌──────────────┐
-│ OpenAI   │  │ OpenAI       │  ← 3 parallel calls
-│ English  │  │ Hindi/Telugu │    (1 English + 2 regional)
-│ 18 vars  │  │ 36 vars raw  │
-└────┬─────┘  └──────┬───────┘
-     │               │
-     │               ▼
-     │        ┌──────────────┐
-     │        │ Sarvam-M     │  ← 36 concurrent refinement calls
-     │        │ Polish each  │
-     │        │ string       │
-     │        └──────┬───────┘
-     │               │
-     └───────┬───────┘
-             ▼
-     ┌───────────────┐
-     │ 54 total      │
-     │ variants      │
-     └───────┬───────┘
-             │
-             ▼
-     ┌───────────────┐
-     │ Webhook Sim   │  ← 54 concurrent deliveries
-     │ Retry logic   │    with exponential backoff
-     │ Delivery logs │
-     └───────────────┘
-```
-
----
 
 ## Output Structure
 
