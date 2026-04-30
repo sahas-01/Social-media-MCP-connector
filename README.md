@@ -60,7 +60,7 @@ User (Claude Desktop)
 
 This MCP server uses the **stdio transport** — Claude Desktop launches it as a local child process and communicates via stdin/stdout. Everything runs on your machine, no remote server needed.
 
-> **Future scaling:** To deploy this for team-wide use (e.g., 50 GrabOn marketers using one shared server), the transport can be swapped from stdio to **SSE/HTTP** ([MCP Streamable HTTP spec](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http)).
+> **Future scaling:** To deploy this for team-wide use (e.g., 50 marketers using one shared server), the transport can be swapped from stdio to **SSE/HTTP** ([MCP Streamable HTTP spec](https://modelcontextprotocol.io/specification/2025-03-26/basic/transports#streamable-http)).
 
 ---
 
